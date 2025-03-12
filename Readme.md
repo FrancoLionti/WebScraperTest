@@ -26,7 +26,7 @@ Medidas de seguridad tomadas:
    sudo apt install chromium-chromedriver
    ```
 
-5. **Copia el script** a la máquina virtual y ejecútalo:
+5. **Copiar el script** a la máquina virtual y ejecútalo:
    ```bash
    python3 crypto_scam_scraper.py
    ```
