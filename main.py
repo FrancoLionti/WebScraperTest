@@ -34,12 +34,9 @@ class CryptoScamScraper:
             use_proxy (bool, optional): Si se debe usar un proxy 
         """
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-        }
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
         self.session = requests.Session()
         self.session.headers.update(self.headers)
         self.wallet_patterns = [
@@ -119,10 +116,11 @@ class CryptoScamScraper:
         if not self.temp_email:
             # Aquí podrías integrar un servicio de correo temporal
             # Por ahora, generamos un correo aleatorio ficticio
-            random_id = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=10))
-            self.temp_email = f"{random_id}@tempmail.example.com"
-            logger.info(f"Correo temporal generado: {self.temp_email}")
-        
+            # random_id = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=10))
+            # self.temp_email = f"{random_id}@tempmail.example.com"
+            # logger.info(f"Correo temporal generado: {self.temp_email}")
+            self.temp_email = "rapitot722@bankrau.com"
+
         return self.temp_email
         
     def check_site_safety(self, url):
@@ -414,21 +412,25 @@ class CryptoScamScraper:
 def main():
     """Función principal para ejecutar el scraper"""
     # Configuración del correo electrónico temporal
-    temp_email = "tucorreo@temporal.com"  # Cambiar por tu correo temporal
-    temp_email_password = "ContraseñaSegura123"  # Cambiar por tu contraseña
+    temp_email = "rapitot722@bankrau.com"  # Cambiar por tu correo temporal
+    temp_email_password = "peni3819+_!"  # Cambiar por tu contraseña
     
     # Lista de URLs a escanear
     urls = [
         # Colocar aquí las URLs a escanear
-        # "https://ejemplo-estafa-cripto.com",
-        # "https://otro-sitio-sospechoso.net"
+        "https://dubblebitcoin.weebly.com",
+        "https://montblanc-pens-sale.com",
+        "https://www.362tradesfx.com",
+        "https://broxtrade.com",
+        "https://premiumforextrader.com",
+        "https://globalcryptocurrencytrades.online",
     ]
-    
+
     # Inicializar el scraper con el correo temporal
     scraper = CryptoScamScraper(
         temp_email=temp_email,
         temp_email_password=temp_email_password,
-        use_proxy=True
+        use_proxy=False
     )
     
     try:

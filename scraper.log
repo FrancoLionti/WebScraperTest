@@ -1,0 +1,31 @@
+2025-03-17 12:21:45,800 - crypto_scam_scraper - INFO - Iniciando análisis de https://dubblebitcoin.weebly.com
+2025-03-17 12:21:45,800 - crypto_scam_scraper - INFO - URL verificada preliminarmente: https://dubblebitcoin.weebly.com
+2025-03-17 12:21:45,800 - crypto_scam_scraper - INFO - Iniciando scraping de https://dubblebitcoin.weebly.com
+2025-03-17 12:21:55,824 - crypto_scam_scraper - INFO - Se encontraron 9648 direcciones de billetera en https://dubblebitcoin.weebly.com
+2025-03-17 12:21:56,334 - crypto_scam_scraper - INFO - Explorando enlace interno: https://dubblebitcoin.weebly.com/
+2025-03-17 12:21:58,762 - crypto_scam_scraper - INFO - Se encontraron 9648 direcciones adicionales en https://dubblebitcoin.weebly.com/
+2025-03-17 12:22:06,541 - crypto_scam_scraper - INFO - Iniciando análisis de https://montblanc-pens-sale.com
+2025-03-17 12:22:06,542 - crypto_scam_scraper - INFO - URL verificada preliminarmente: https://montblanc-pens-sale.com
+2025-03-17 12:22:06,542 - crypto_scam_scraper - INFO - Iniciando scraping de https://montblanc-pens-sale.com
+2025-03-17 12:22:29,894 - crypto_scam_scraper - INFO - El sitio https://montblanc-pens-sale.com requiere inicio de sesión. Cambiando a modo navegador.
+2025-03-17 12:46:21,685 - crypto_scam_scraper - ERROR - Error al hacer scraping de https://montblanc-pens-sale.com: Message: Unable to obtain driver for chrome; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location
+
+2025-03-17 12:46:29,664 - crypto_scam_scraper - INFO - Iniciando análisis de https://www.362tradesfx.com
+2025-03-17 12:46:29,664 - crypto_scam_scraper - INFO - URL verificada preliminarmente: https://www.362tradesfx.com
+2025-03-17 12:46:29,664 - crypto_scam_scraper - INFO - Iniciando scraping de https://www.362tradesfx.com
+2025-03-17 12:46:35,274 - crypto_scam_scraper - ERROR - Error al hacer scraping de https://www.362tradesfx.com: HTTPSConnectionPool(host='www.362tradesfx.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x729f2a3fa150>: Failed to resolve 'www.362tradesfx.com' ([Errno -2] Name or service not known)"))
+2025-03-17 12:46:42,386 - crypto_scam_scraper - INFO - Iniciando análisis de https://broxtrade.com
+2025-03-17 12:46:42,386 - crypto_scam_scraper - INFO - URL verificada preliminarmente: https://broxtrade.com
+2025-03-17 12:46:42,386 - crypto_scam_scraper - INFO - Iniciando scraping de https://broxtrade.com
+2025-03-17 12:46:43,233 - crypto_scam_scraper - ERROR - Error al hacer scraping de https://broxtrade.com: HTTPSConnectionPool(host='broxtrade.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x729f28e2b500>: Failed to resolve 'broxtrade.com' ([Errno -2] Name or service not known)"))
+2025-03-17 12:46:49,630 - crypto_scam_scraper - INFO - Iniciando análisis de https://premiumforextrader.com
+2025-03-17 12:46:49,630 - crypto_scam_scraper - INFO - URL verificada preliminarmente: https://premiumforextrader.com
+2025-03-17 12:46:49,630 - crypto_scam_scraper - INFO - Iniciando scraping de https://premiumforextrader.com
+2025-03-17 12:46:50,546 - crypto_scam_scraper - ERROR - Error al hacer scraping de https://premiumforextrader.com: HTTPSConnectionPool(host='premiumforextrader.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x729f28e2ba40>: Failed to resolve 'premiumforextrader.com' ([Errno -2] Name or service not known)"))
+2025-03-17 12:46:57,766 - crypto_scam_scraper - INFO - Iniciando análisis de https://globalcryptocurrencytrades.online
+2025-03-17 12:46:57,766 - crypto_scam_scraper - INFO - URL verificada preliminarmente: https://globalcryptocurrencytrades.online
+2025-03-17 12:46:57,766 - crypto_scam_scraper - INFO - Iniciando scraping de https://globalcryptocurrencytrades.online
+2025-03-17 12:46:58,628 - crypto_scam_scraper - ERROR - Error al hacer scraping de https://globalcryptocurrencytrades.online: HTTPSConnectionPool(host='globalcryptocurrencytrades.online', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x729f28e2bfb0>: Failed to resolve 'globalcryptocurrencytrades.online' ([Errno -2] Name or service not known)"))
+2025-03-17 12:47:04,807 - crypto_scam_scraper - INFO - Resultados guardados en wallets.txt
+2025-03-17 12:47:04,807 - crypto_scam_scraper - INFO - Proceso completado. Se encontraron 707 direcciones únicas.
+2025-03-17 12:47:04,808 - crypto_scam_scraper - INFO - Scraper cerrado correctamente
