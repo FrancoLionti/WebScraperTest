@@ -1,0 +1,7 @@
+2025-04-05 10:23:47,039 - crypto_scam_scraper_browser - INFO - URL verificada preliminarmente: http://dubblebitcoin.weebly.com
+2025-04-05 10:23:47,039 - crypto_scam_scraper_browser - INFO - Iniciando scraping de http://dubblebitcoin.weebly.com
+2025-04-05 10:23:47,529 - crypto_scam_scraper_browser - WARNING - Acceso denegado (código 403). Cambiando a modo navegador.
+2025-04-05 10:23:48,009 - crypto_scam_scraper_browser - INFO - Navegador configurado correctamente
+2025-04-05 10:23:48,009 - crypto_scam_scraper_browser - INFO - Accediendo a http://dubblebitcoin.weebly.com con navegador automatizado
+2025-04-05 10:24:00,749 - crypto_scam_scraper_browser - INFO - Se encontraron 78 direcciones de billetera mediante navegador
+2025-04-05 10:24:02,320 - httpx - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"

@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>Usar API GPT con Python</title>
+  </head>
+  <body>
+    <h1>Reconocer y Procesar Elemento HTML con OpenAI</h1>
+    <div id="miElemento">Texto a procesar con GPT</div>
+    <button onclick="procesarTexto()">Procesar Texto</button>
+    <div id="resultado"></div>
+
+    <script>
+      async function procesarTexto() {
+        // Obtener el texto del elemento HTML
+        let texto = document.getElementById('miElemento').innerText;
+
+        // Enviar el texto al backend de Python
+        const response = await fetch('http://localhost:5000/procesar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ texto: texto })
+        });
+
+        const data = await response.json();
+        
+        // Mostrar la respuesta del backend en la página web
+        document.getElementById('resultado').innerText = data.respuesta;
+      }
+    </script>
+  </body>
+</html>
