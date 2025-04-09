@@ -3,7 +3,7 @@ import CryptoScamScraperTest
 import json
 
 # url = "http://127.0.0.1:5500/WebScraperTest/Test_Scripts/index1.html"
-url = "http://dubblebitcoin.weebly.com"
+url = "test_site"
 
 
 scraper = CryptoScamScraperTest.CryptoScamScraper()
