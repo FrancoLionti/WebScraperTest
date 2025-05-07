@@ -1,22 +1,14 @@
 from openai import OpenAI
-import CryptoScamScraperTest01
+import CryptoScamScraperTest02
 import json
 
 # url = "http://127.0.0.1:5500/WebScraperTest/Test_Scripts/index1.html"
 url = "https://dubblebitcoin.weebly.com"
 
-scraper = CryptoScamScraperTest01.CryptoScamScraper()
+scraper = CryptoScamScraperTest02.CryptoScamScraper()
 
 # Realizar el scraping
 wallet_data = scraper.scrape_site(url)
-
-# Verificar si wallet_data contiene datos
-if wallet_data is None:
-    print("Error: No se obtuvieron datos del scraping")
-    scraper.close()
-    exit(1)
-
-# print(wallet_data)
 
 # Estructurar el resultado para el LLM
 structured_result = {
@@ -38,13 +30,15 @@ for addr in wallet_data['addresses']:
 
 # Guardar el resultado en un archivo JSON
 output_file = "wallet_data.json"
+with open(output_file, "w") as f:
+    json.dump(structured_result, f, indent=4)
 
-# with open(output_file, "w") as f:
-#     json.dump(structured_result, f, indent=4)
+# Imprimir un resumen en la consola
+print(f"Se encontraron {len(wallet_data['addresses'])} direcciones de billeteras.")
+print(f"Resultados guardados en {output_file}")
 
-# # Imprimir un resumen en la consola
-# print(f"Se encontraron {len(wallet_data['addresses'])} direcciones de billeteras.")
-# print(f"Resultados guardados en {output_file}")
+# Cerrar el scraper
+scraper.close()
 
 # # Configura la API de DeepSeek
 # client = OpenAI(
@@ -70,4 +64,6 @@ output_file = "wallet_data.json"
 
 # # Imprime la respuesta de la API de DeepSeek
 # print(completion.choices[0].message.content)
+
+# Cerrar el scraper
 scraper.close()

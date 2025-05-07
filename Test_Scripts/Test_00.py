@@ -3,8 +3,7 @@ import CryptoScamScraperTest
 import json
 
 # url = "http://127.0.0.1:5500/WebScraperTest/Test_Scripts/index1.html"
-url = "http://dubblebitcoin.weebly.com"
-
+url = "https://dubblebitcoin.weebly.com"
 
 scraper = CryptoScamScraperTest.CryptoScamScraper()
 texto = scraper.scrape_site(url)
@@ -14,7 +13,7 @@ print(texto)
 # Configura la API de DeepSeek
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key="API KEY",
+    api_key="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",
 )
 
 # Envía el contenido completo del HTML a la API de DeepSeek

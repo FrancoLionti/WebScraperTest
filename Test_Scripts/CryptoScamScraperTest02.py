@@ -3,15 +3,15 @@ import requests
 import time
 import random
 import re
-import openai
-from flask import Flask, request, jsonify
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-# import GPTLoginHelper
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium_stealth import stealth
 
 # Configuración de logging
 logging.basicConfig(
@@ -27,6 +27,8 @@ logger = logging.getLogger("crypto_scam_scraper_browser")
 class CryptoScamScraper:
     def __init__(self, temp_email=None, temp_email_password=None, use_proxy=False, use_gpt=False, gpt_api_key=None):  
         """
+        Testing02
+
         Inicializa el scraper con opciones configurables
         
         Args:
@@ -68,6 +70,8 @@ class CryptoScamScraper:
         self.use_gpt = use_gpt
         self.gpt_api_key = gpt_api_key
 
+    """ Setup de proxy y navegador """
+
     def setup_proxy(self):
         """Configura un proxy para añadir una capa adicional de seguridad"""
         # Implementar proxy rotation o algo por el estilo para evitar detección
@@ -82,26 +86,24 @@ class CryptoScamScraper:
         self.session.proxies.update(self.proxy)
         logger.info("Proxy configurado correctamente")
         
-    def setup_browser(self, headless=True):
+    def setup_browser(self, headless=False):
         """Configura un navegador con opciones de seguridad para sitios que requieren JavaScript"""
         chrome_options = Options()
         if headless:
-            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--headless=new")
         
-        # Opciones de seguridad
+        # Opciones de seguridad pero permitiendo JS y cookies para sitios que los requieren
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--disable-features=IsolateOrigins,site-per-process")
-        chrome_options.add_argument("--disable-web-security")
-        chrome_options.add_argument("--disable-site-isolation-trials")
         
-        # Bloquear JavaScript potencialmente peligroso
-        chrome_options.add_argument("--disable-javascript")
+        # Remove these lines as they block JavaScript and cookies
+        # chrome_options.add_argument("--disable-javascript")
+        # chrome_options.add_argument("--disable-cookies")
         
-        # Bloquear cookies
-        chrome_options.add_argument("--disable-cookies")
+        # Set a realistic user agent
+        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
         # Desactivar autoguardado de contraseñas
         chrome_options.add_experimental_option(
@@ -146,129 +148,222 @@ class CryptoScamScraper:
         
     """
     -------------------------------------------------------------------------------------------------------------------
-    Metodo principal llamado desde el main
+    Metodos principales llamados desde el main
     -------------------------------------------------------------------------------------------------------------------
     """
-    def gpt_start_scrape_test():
-        # Obtener el texto desde la solicitud POST
-        data = request.json
-        texto = data.get('texto', '')
-
-        # Llamar a la API de OpenAI
-        response = openai.Completion.create(
-            model="text-davinci-003",  # O el modelo que prefieras
-            prompt=texto,
-            max_tokens=100
-        )
-
-        # Extraer el texto generado por GPT
-        gpt_respuesta = response.choices[0].text.strip()
-
-        # Devolver la respuesta al frontend
-        return jsonify({'respuesta': gpt_respuesta})
 
     def scrape_site(self, url):
-        """Realiza scraping de un sitio utilizando requests y BeautifulSoup"""
-        if not self.check_site_safety(url):
-            logger.error(f"El sitio {url} ha sido marcado como inseguro. Abortando scraping.")
-            return []       
+        # Configurar opciones de Chrome
+        chrome_options = Options()
+        
+        # Especificar la ruta exacta al binario de Chrome
+        chrome_options.binary_location = "/usr/bin/google-chrome"
+        
+        # Opciones para hacer que Chrome sea menos detectable
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument(f"user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        
         try:
-            logger.info(f"Iniciando scraping de {url}")
-            response = self.session.get(url, timeout=10)
-            response.raise_for_status()
-            
-            # Verificar si la página requiere inicio de sesión o registro
-            if self.requires_login(response.text):
-                logger.info(f"El sitio {url} requiere inicio de sesión. Cambiando a modo navegador.")
-                return self.scrape_with_browser(url)
-                
-            # Extraer direcciones de billetera
-            wallets = self.extract_wallet_addresses(response.text)
-            logger.info(f"Se encontraron {len(wallets)} direcciones de billetera en {url}")
-            
-            # También buscamos en enlaces internos
-            soup = BeautifulSoup(response.text, 'html.parser')
-            internal_links = self.get_internal_links(soup, url)
-            
-            # Limitar cantidad de enlaces internos para no sobrecargar
-            internal_links = internal_links[:5]
-            
-            for link in internal_links:
-                logger.info(f"Explorando enlace interno: {link}")
-                time.sleep(random.uniform(2, 5))  # Pausa para no sobrecargar el servidor
-                try:
-                    sub_response = self.session.get(link, timeout=10)
-                    sub_wallets = self.extract_wallet_addresses(sub_response.text)
-                    wallets.extend(sub_wallets)
-                    logger.info(f"Se encontraron {len(sub_wallets)} direcciones adicionales en {link}")
-                except Exception as e:
-                    logger.error(f"Error al explorar enlace interno {link}: {str(e)}")
-                    
-            return list(set(wallets))  # Eliminamos duplicados
-            
+            # Inicializar el navegador
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+            # Añadir un timeout para cargar la página
+            driver.set_page_load_timeout(30)
+
+            # Cargar la página
+            driver.get(url)
+
+            # Esperar un tiempo aleatorio para que cargue completamente el JS
+            WebDriverWait(driver, 20).until(
+                lambda d: d.execute_script('return document.readyState') == 'complete'
+            )
+
+            # Obtener el contenido de la página
+            page_source = driver.page_source
+
+            # Cerrar el navegador
+            driver.quit()
+
+            # Procesar el contenido HTML para extraer las billeteras con contexto
+            return self.extract_wallet_addresses(page_source)
+
         except Exception as e:
-            logger.error(f"Error al hacer scraping de {url}: {str(e)}")
-            return []
-    
-    def requires_login(self, html_content):
-        """Detecta si una página requiere inicio de sesión o registro"""
-        login_indicators = [
-            'iniciar sesión', 'login', 'sign in', 'acceder', 'register',
-            'registrarse', 'create account', 'crear cuenta'
-        ]
-        
-        soup = BeautifulSoup(html_content, 'html.parser')
-        text_content = soup.get_text().lower()
-        
-        # Buscar formularios
-        forms = soup.find_all('form')
-        
-        # Verificar si hay formularios con campos de entrada que parecen de login/registro
-        for form in forms:
-            inputs = form.find_all('input')
-            input_types = [inp.get('type', '').lower() for inp in inputs]
-            input_names = [inp.get('name', '').lower() for inp in inputs]
-            
-            if 'password' in input_types or 'password' in input_names:
-                return True
-                
-        # Verificar texto indicativo de login/registro
-        return any(indicator in text_content for indicator in login_indicators)
-        
+            if 'driver' in locals():
+                driver.quit()
+            logger.error(f"Error en Selenium: {str(e)}")
+            return {'addresses': [], 'details': {}}
+
     def scrape_with_browser(self, url):
-            """Utiliza Selenium para sitios que requieren JavaScript o login"""
-            if self.browser is None:
-                self.setup_browser()
+        """Utiliza Selenium para sitios que requieren JavaScript o login"""
+        if self.browser is None:
+            self.setup_browser(headless=False)  # Set to False for difficult sites
+            
+        try:
+            logger.info(f"Accediendo a {url} con navegador automatizado")
+            self.browser.get(url)
+            # Wait longer for the page to fully load
+            time.sleep(5)
+            
+            # Execute JavaScript to scroll down the page to trigger lazy loading
+            self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
+            time.sleep(2)
+            self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+            
+            # Extraer el contenido actualizado después de cualquier interacción
+            page_source = self.browser.page_source
+            wallet_data = self.extract_wallet_addresses(page_source)
+            
+            # Check if we found wallets
+            if wallet_data['addresses']:
+                logger.info(f"Se encontraron {len(wallet_data['addresses'])} direcciones de billetera mediante navegador")
+            else:
+                logger.info("No se encontraron direcciones de billeteras mediante navegador")
                 
-            try:
-                logger.info(f"Accediendo a {url} con navegador automatizado")
-                self.browser.get(url)
-                time.sleep(3)  # Esperar a que la página cargue completamente
-                
-                # Verificar si hay formulario de registro
-                if self.has_registration_form():
-                    logger.info("Detectado formulario de registro. Intentando registrarse.")
-                    self.register_account()
+                # Try navigating to subpages
+                try:
+                    all_links = self.browser.find_elements(By.TAG_NAME, "a")
+                    internal_links = []
                     
-                # Verificar si hay formulario de login
-                elif self.has_login_form():
-                    logger.info("Detectado formulario de login. No es posible continuar sin credenciales.")
-                    # Aquí podrías implementar lógica para usar credenciales si las tienes
+                    # Get up to 3 internal links
+                    for link in all_links[:10]:
+                        href = link.get_attribute("href")
+                        if href and url in href and href not in internal_links:
+                            internal_links.append(href)
+                            if len(internal_links) >= 3:
+                                break
                     
-                # Extraer el contenido actualizado después de cualquier interacción
-                page_source = self.browser.page_source
-                wallets = self.extract_wallet_addresses(page_source)
+                    # Visit internal pages
+                    for link in internal_links:
+                        try:
+                            logger.info(f"Explorando enlace interno con navegador: {link}")
+                            self.browser.get(link)
+                            time.sleep(3)
+                            sub_page_source = self.browser.page_source
+                            sub_wallet_data = self.extract_wallet_addresses(sub_page_source)
+                            
+                            # Merge the results
+                            wallet_data['addresses'].extend(sub_wallet_data['addresses'])
+                            for addr, details in sub_wallet_data['details'].items():
+                                if addr in wallet_data['details']:
+                                    wallet_data['details'][addr].extend(details)
+                                else:
+                                    wallet_data['details'][addr] = details
+                        except Exception as e:
+                            logger.error(f"Error al explorar enlace interno con navegador {link}: {str(e)}")
+                except Exception as e:
+                    logger.error(f"Error al buscar enlaces internos: {str(e)}")
+                    
+            return wallet_data
                 
-                return wallets
-                
-            except Exception as e:
-                logger.error(f"Error al hacer scraping con navegador de {url}: {str(e)}")
-                return []
-            finally:
-                # Capturar screenshot para análisis posterior
-                if self.browser:
+        except Exception as e:
+            logger.error(f"Error al hacer scraping con navegador de {url}: {str(e)}")
+            return {'addresses': [], 'details': {}}
+        finally:
+            # Capturar screenshot para análisis posterior
+            if self.browser:
+                try:
                     self.browser.save_screenshot(f"screenshot_{int(time.time())}.png")
+                except:
+                    pass
+
+    def extract_wallet_addresses(self, html_content):
+        """
+        Extrae direcciones de billeteras de criptomonedas del contenido HTML
+        junto con su contexto circundante para mejor análisis.
+        """
+        wallet_data = {}
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        # Convertir el HTML a texto para búsqueda por regex
+        text_content = soup.get_text()
+
+        for pattern in self.wallet_patterns:
+            # Buscar en el HTML completo
+            for match in re.finditer(pattern, text_content):  # Cambiado a text_content para asegurar que se busque en el texto visible
+                address = match.group(0)
+
+                if address not in wallet_data:
+                    wallet_data[address] = []
+
+                # Encontrar el elemento HTML que contiene esta dirección
+                containing_element = None
+                for tag in soup.find_all(string=re.compile(re.escape(address))):
+                    containing_element = tag.parent
+                    break
+
+                # Extraer el HTML del contenedor y su contexto
+                if containing_element:
+                    div_html = str(containing_element)
+                    surrounding_text = containing_element.get_text(strip=True)[:200]  # Primeros 200 caracteres
+
+                    # Capturar el contenedor padre del contenedor actual (abuelo)
+                    parent_element = containing_element.find_parent()
+                    parent_html = str(parent_element) if parent_element else "No se encontró contenedor padre"
+                    parent_attributes = parent_element.attrs if parent_element else {}
+
+                    # Capturar texto de los elementos hermanos
+                    sibling_text = " | ".join([sibling.get_text(strip=True) for sibling in containing_element.find_next_siblings()[:3]])
+                else:
+                    div_html = "No se encontró un contenedor adecuado"
+                    surrounding_text = "No se encontró texto circundante"
+                    parent_html = "No se encontró contenedor padre"
+                    parent_attributes = {}
+                    sibling_text = "No se encontraron elementos hermanos"
+
+                # Extraer contexto adicional del texto
+                text_window = 100  # caracteres antes y después
+                match_text_pos = text_content.find(address)
+                if match_text_pos >= 0:
+                    start_pos = max(0, match_text_pos - text_window)
+                    end_pos = min(len(text_content), match_text_pos + len(address) + text_window)
+                    text_context = text_content[start_pos:end_pos]
+                else:
+                    text_context = "Contexto no encontrado"
+
+                wallet_context = {
+                    'address': address,
+                    'div_html': div_html,
+                    'parent_html': parent_html,
+                    'parent_attributes': parent_attributes,
+                    'sibling_text': sibling_text,
+                    'text_context': text_context,
+                    'surrounding_text': surrounding_text
+                }
+
+                wallet_data[address].append(wallet_context)
+
+        # Formatear los datos para facilitar el consumo por el LLM
+        result = {
+            'addresses': list(wallet_data.keys()),
+            'details': wallet_data
+        }
+
+        return result
+
+    """ Context manager para el scraper """
     
+    def close(self):
+        """Cierra todas las conexiones y sesiones"""
+        if self.browser:
+            self.browser.quit()
+        self.session.close()
+        logger.info("Scraper cerrado correctamente")
+        
+    def save_results(self, wallets, filename="wallets.txt"):
+        """Guarda las direcciones de billeteras encontradas en un archivo"""
+        with open(filename, 'w') as f:
+            for wallet in wallets:
+                f.write(f"{wallet}\n")
+        logger.info(f"Resultados guardados en {filename}")
+
+
+
+
+
+
     def has_registration_form(self):
         """Detecta si hay un formulario de registro en la página actual"""
         try:
@@ -319,8 +414,31 @@ class CryptoScamScraper:
             logger.error(f"Error al verificar formulario de login: {str(e)}")
             return False
 
-
-# Esta vuela por ahora
+    def requires_login(self, html_content):
+        """Detecta si una página requiere inicio de sesión o registro"""
+        login_indicators = [
+            'iniciar sesión', 'login', 'sign in', 'acceder', 'register',
+            'registrarse', 'create account', 'crear cuenta'
+        ]
+        
+        soup = BeautifulSoup(html_content, 'html.parser')
+        text_content = soup.get_text().lower()
+        
+        # Buscar formularios
+        forms = soup.find_all('form')
+        
+        # Verificar si hay formularios con campos de entrada que parecen de login/registro
+        for form in forms:
+            inputs = form.find_all('input')
+            input_types = [inp.get('type', '').lower() for inp in inputs]
+            input_names = [inp.get('name', '').lower() for inp in inputs]
+            
+            if 'password' in input_types or 'password' in input_names:
+                return True
+                
+        # Verificar texto indicativo de login/registro
+        return any(indicator in text_content for indicator in login_indicators)
+    
     def register_account(self):
         """Intenta registrar una cuenta con correo temporal"""
         try:
@@ -399,17 +517,6 @@ class CryptoScamScraper:
             logger.error(f"Error durante el proceso de registro: {str(e)}")
             return False
 
-
-    def extract_wallet_addresses(self, html_content):
-        """Extrae direcciones de billeteras de criptomonedas del contenido HTML"""
-        wallets = []
-        
-        for pattern in self.wallet_patterns:
-            matches = re.findall(pattern, html_content)
-            wallets.extend(matches)
-            
-        return wallets
-        
     def get_internal_links(self, soup, base_url):
         """Extrae enlaces internos de la página"""
         internal_links = []
@@ -426,20 +533,6 @@ class CryptoScamScraper:
                 internal_links.append(href)
                 
         return internal_links
-        
-    def close(self):
-        """Cierra todas las conexiones y sesiones"""
-        if self.browser:
-            self.browser.quit()
-        self.session.close()
-        logger.info("Scraper cerrado correctamente")
-        
-    def save_results(self, wallets, filename="wallets.txt"):
-        """Guarda las direcciones de billeteras encontradas en un archivo"""
-        with open(filename, 'w') as f:
-            for wallet in wallets:
-                f.write(f"{wallet}\n")
-        logger.info(f"Resultados guardados en {filename}")
 
 # if __name__ == "__main__":
 #     CryptoScamScraper()
